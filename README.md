@@ -1,4 +1,4 @@
-# lab-mise
+# lab-mise-private-registry
 
 Laboratório que simula um ambiente corporativo com acesso à internet bloqueado, onde desenvolvedores instalam ferramentas Java exclusivamente através de um repositório interno Nexus OSS provisionado automaticamente.
 
