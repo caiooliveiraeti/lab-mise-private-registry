@@ -1,0 +1,70 @@
+services:
+  nexus:
+    image: sonatype/nexus3
+    container_name: nexus
+    ports:
+      - "8081:8081"
+    volumes:
+      - nexus_data:/nexus-data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8081/service/rest/v1/status/writable"]
+      interval: 15s
+      timeout: 10s
+      retries: 30
+      start_period: 120s
+    restart: unless-stopped
+
+  setup:
+    build:
+      context: ./setup
+    container_name: lab-setup
+    depends_on:
+      nexus:
+        condition: service_healthy
+    volumes:
+      - ./downloads:/downloads:ro
+      - nexus_data:/nexus-data:ro
+    environment:
+      - NEXUS_URL=http://nexus:8081
+      - NEXUS_ADMIN_PASSWORD=${NEXUS_ADMIN_PASSWORD}
+      - DEV1_PASSWORD=${DEV1_PASSWORD}
+      - DEV2_PASSWORD=${DEV2_PASSWORD}
+      - CORRETTO_8=${CORRETTO_8}
+      - CORRETTO_17=${CORRETTO_17}
+      - CORRETTO_21=${CORRETTO_21}
+    restart: "no"
+
+  dev1:
+    build:
+      context: ./dev
+    container_name: lab-dev1
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+    environment:
+      - NEXUS_USER=dev1
+      - NEXUS_PASSWORD=${DEV1_PASSWORD}
+      - CORRETTO_8=${CORRETTO_8}
+      - CORRETTO_17=${CORRETTO_17}
+      - CORRETTO_21=${CORRETTO_21}
+    stdin_open: true
+    tty: true
+
+  dev2:
+    build:
+      context: ./dev
+    container_name: lab-dev2
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+    environment:
+      - NEXUS_USER=dev2
+      - NEXUS_PASSWORD=${DEV2_PASSWORD}
+      - CORRETTO_8=${CORRETTO_8}
+      - CORRETTO_17=${CORRETTO_17}
+      - CORRETTO_21=${CORRETTO_21}
+    stdin_open: true
+    tty: true
+
+volumes:
+  nexus_data:
