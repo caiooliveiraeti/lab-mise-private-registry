@@ -1,0 +1,2 @@
+# url_replacements estão em ~/.config/mise/config.toml (configurado pelo entrypoint)
+# Para instalar java: mise install java@corretto-21.0.11.10.1
